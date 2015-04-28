@@ -1,0 +1,39 @@
+@startuml
+
+title Authentication State Chart
+
+[*] -u-> UILogin : User Data submitted via UI
+[*] -d-> PTULogin : PTU data submitted via API
+
+state UILogin {
+    UILogin : Entry / User Queried
+    UILogin : Exit / User Confirmed
+
+    state "Database" as userDatabase
+    state "Check Password" as userPassword
+    state "Failure" as userFailure
+
+    [*] -> userDatabase : Query for User
+    userDatabase -> userPassword : Valid User
+    userDatabase -u-> userFailure : Invalid User
+    userPassword -> [*] : Valid Password
+    userPassword -u-> userFailure : Invalid Password
+}
+
+state PTULogin {
+    PTULogin : Entry / PTU Queried
+    PTULogin : Exit / PTU Confirmed
+
+    state "Database" as PTUDatabase
+    state "Check Password" as PTUPassword
+    state "Failure" as PTUFailure
+
+    [*] -> PTUDatabase : Query for PTU
+    PTUDatabase -> PTUPassword : Valid PTU
+    PTUDatabase -u-> PTUFailure : Invalid PTU
+    PTUPassword -> [*] : Valid Password
+    PTUPassword -u-> PTUFailure : Invalid Password
+}
+
+@enduml
+

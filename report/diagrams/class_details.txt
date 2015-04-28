@@ -1,0 +1,89 @@
+' DO NOT DO A PTU CLASS AS IT'S EXTERNAL BLACK BOX SYSTEM!
+' python -m plantuml diagrams/classes.txt
+
+skinparam classAttributeIconSize 0
+skinparam nodesep 75
+title SPACS System Class Details Diagram
+
+Class Pool {
+    pool_owner: User
+
+    ' Pool Measurement Values
+    ph: Float
+    ORP: Float
+    TA: Float
+    temp: Float
+    water_hardness: Float
+    last_filter_operation: datetime
+    water_flow_rate: Float
+    chlorinator_status: String
+    water_level_status: String
+
+    ' Pool ID Values
+    pool_type: String
+    filter_type: String
+    pump_type: String
+    chlorinator_type: String
+    pool_capacity: Float
+}
+
+class PTU {
+    pool_shop_admin: User
+
+    login_id: Integer
+    password: String
+    need_reset: Boolean
+
+    gather_pool_measurements()
+    regular_check_in()
+    urgent_check_in()
+    send_email()
+}
+
+class SPACS {
+    SPACSAdmin: User
+
+    acknowledge_receipt()
+    ' authentication()
+    user_login()
+    ptu_login()
+    process_data()
+    overdue_update()
+    send_email()
+    status_report()
+    view_report()
+
+    ' Pool Controls
+    add_pool()
+    edit_pool()
+    delete_pool()
+    transfer_pools()
+
+    ' Shop Controls
+    add_shop()
+    edit_shop()
+    delete_shop()
+}
+
+class User {
+    login_name : String
+    password : String
+    role : String
+
+    name: String
+    address: Text
+    email: String
+}
+
+
+class PoolOwner {
+    role : 'PoolOwner'
+}
+
+class PoolShopAdmin {
+    role: 'PoolShopAdmin'
+}
+
+class SPACSAdmin{
+    role: 'SPACSAdmin'
+}

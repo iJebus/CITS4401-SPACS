@@ -1,0 +1,32 @@
+' python -m plantuml diagrams/usecases.txt
+
+
+left to right direction
+skinparam packageStyle rect
+title SPACS System Usecase Diagram
+
+actor PTU
+actor PoolOwner
+actor PoolShopAdmin
+actor SPACSAdmin
+
+rectangle SPACS {
+
+    (RegularCheckIn) <. (Alert) : <<extend>>
+    (UrgentCheckIn) <. (Alert) : <<extend>>
+    (NoCheckInAlarm) <. (Alert) : <<extend>>
+    (Alert) -> PoolOwner
+    (Alert) -> PoolShopAdmin
+    (Alert) -> SPACSAdmin
+    PoolOwner --> (ViewReport)
+    PoolShopAdmin -> (ViewReport)
+    PoolShopAdmin -> (AddPool)
+    PoolShopAdmin -> (EditPool)
+    PoolShopAdmin -> (RemovePool)
+    PTU --> (RegularCheckIn)
+    PTU --> (UrgentCheckIn)
+    SPACSAdmin -> (AddPoolShop)
+    SPACSAdmin -> (EditPoolShop)
+    SPACSAdmin -> (RemovePoolShop)
+}
+

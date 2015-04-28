@@ -10,8 +10,8 @@
 
 1 Portability
 
-4 Modern programming useage to ensure maintainability and reusability of design/code
-5 Flexiblility with PTU system
+4 Modern programming usage to ensure maintainability and reusability of design/code
+5 Flexibility with PTU system
 
 4 Support new pool types
 2 Support human problem input
