@@ -1,0 +1,63 @@
+@startuml
+hide footbox
+title RegularCheckIn Sequence Diagram
+
+actor PoolOwner
+actor PoolShopAdministrator
+actor PTU
+boundary SPACS
+database database
+
+/' boundary Foo2
+control Foo3
+entity Foo4
+database database
+
+ 1st column: Should correspond to the actor who
+initiated the use case
+ 2nd column: Should be a boundary object
+ 3rd column: Should be the control object that
+manages the rest of the use case
+
+'/
+
+== Authorisation ==
+activate PTU
+PTU -> SPACS: Authentication Request (ptu_login()?)
+activate SPACS
+
+SPACS -> database: Authentication Request
+activate database
+database --> SPACS: Authentication Response
+deactivate database
+
+alt valid login
+    SPACS --> PTU: Authentication Response(login_confirmed?)
+    |||
+else invalid login
+    SPACS --> PTU: Authentication Response(login_failed?)
+    |||
+end
+
+
+== Data Submission ==
+PTU -> SPACS: receive_data()
+SPACS --> PTU: acknowledge_receipt()
+deactivate PTU
+
+SPACS -> SPACS: process_data()
+activate SPACS
+alt data inside safe ranges
+    SPACS -> database: store_data()
+    |||
+else data outside safe ranges
+    SPACS -> database: store_data()
+    SPACS --> PoolOwner: Warning(send_mail())
+    SPACS --> PoolShopAdministrator: Warning(send_email())
+    |||
+end
+deactivate SPACS
+
+deactivate SPACS
+
+@enduml

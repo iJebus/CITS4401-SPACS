@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %}SPACS Login{% endblock %}
 
@@ -9,6 +10,20 @@
 {% endblock %}
 
 {% block content %}
+{{ super() }}
+{% if current_user.is_authenticated() %}
+Hi {{ current_user.login_name }}!
+{% endif %}
+
+<div class="container">
+
+    {{ wtf.quick_form(form, extra_classes="form-signin") }}
+
+</div>
+{% endblock %}
+
+<!--
+
 <div class="container">
 
       <form class="form-signin">
@@ -26,4 +41,5 @@
       </form>
 
     </div>
-{% endblock %}
+
+-->
