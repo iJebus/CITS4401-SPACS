@@ -1,45 +1,21 @@
 {% extends "base.html" %}
-{% import "bootstrap/wtf.html" as wtf %}
 
-{% block title %}SPACS Login{% endblock %}
-
-{% block styles %}
-{{super()}}
-<link rel="stylesheet"
-      href="{{url_for('.static', filename='css/signin.css')}}">
-{% endblock %}
+{% block title %}SPACS Home{% endblock %}
 
 {% block content %}
 {{ super() }}
 {% if current_user.is_authenticated() %}
 Hi {{ current_user.login_name }}!
-{% endif %}
-
+{% else %}
 <div class="container">
-
-    {{ wtf.quick_form(form, extra_classes="form-signin") }}
-
-</div>
-{% endblock %}
-
-<!--
-
-<div class="container">
-
-      <form class="form-signin">
-        <h2 class="form-signin-heading">Please sign in</h2>
-        <label for="inputEmail" class="sr-only">Email address</label>
-        <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
-        <label for="inputPassword" class="sr-only">Password</label>
-        <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
-        <div class="checkbox">
-          <label>
-            <input type="checkbox" value="remember-me"> Remember me
-          </label>
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4">
+            <h1>Spacs</h1>
+            <a href="{{ url_for('login') }}"><button type="button" class="btn btn-lg">Login</button></a>
         </div>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-      </form>
-
     </div>
 
--->
+</div>
+{% endif %}
+
+{% endblock %}

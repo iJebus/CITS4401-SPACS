@@ -12,7 +12,7 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.sqlite'
 app.config['SECRET_KEY'] = 'CHEESE'
 
 Bootstrap(app)
@@ -29,7 +29,7 @@ def load_user(user_id):
 
 
 class User(db.Model, UserMixin, AnonymousUserMixin):
-    __tablename__ = 'users'
+    __tablename__ = 'user'
     id = db.Column(db.Integer(), primary_key=True)
 
     login_name = db.Column(db.String(), unique=True, index=True)
@@ -40,6 +40,7 @@ class User(db.Model, UserMixin, AnonymousUserMixin):
     role = db.Column(db.String())
 
     pools = db.relationship('Pool', backref='user', lazy='dynamic')
+    shops = db.relationship('Shop', backref='user', lazy='dynamic')
 
     def __init__(self, login_name, password):
         self.login_name = login_name
@@ -56,7 +57,7 @@ class User(db.Model, UserMixin, AnonymousUserMixin):
 
 
 class PoolOwner(User, db.Model):
-    __tablename__ = 'users'
+    __tablename__ = 'user'
     __table_args__ = {'useexisting': True}
 
     def __init__(self, login_name, password):
@@ -65,7 +66,7 @@ class PoolOwner(User, db.Model):
 
 
 class PoolShopAdmin(User, db.Model):
-    __tablename__ = 'users'
+    __tablename__ = 'user'
     __table_args__ = {'useexisting': True}
 
     def __init__(self, login_name, password):
@@ -74,7 +75,7 @@ class PoolShopAdmin(User, db.Model):
 
 
 class SPACSAdmin(User, db.Model):
-    __tablename__ = 'users'
+    __tablename__ = 'user'
     __table_args__ = {'useexisting': True}
 
     def __init__(self, login_name, password):
@@ -82,8 +83,19 @@ class SPACSAdmin(User, db.Model):
         self.role = 'SPACSAdmin'
 
 
+class Shop(db.Model):
+    __tablename__ = 'shop'
+    id = db.Column(db.Integer(), primary_key=True)
+
+    shop_admin_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    pools = db.relationship('Pool', backref='shop', lazy='dynamic')
+
+    def __init__(self, shop_admin):
+        self.shop_admin_id = shop_admin
+
+
 class Pool(db.Model):
-    __tablename__ = 'pools'
+    __tablename__ = 'pool'
     id = db.Column(db.Integer(), primary_key=True)
 
     length = db.Column(db.Float())
@@ -96,23 +108,29 @@ class Pool(db.Model):
     shop_id = db.Column(db.Integer, db.ForeignKey('shop.id'))
     reports = db.relationship('Report', backref='pool', lazy='dynamic')
 
-
-class PoolShop(db.Model):
-    __tablename__ = 'pool_shops'
-    id = db.Column(db.Integer(), primary_key=True)
-
-    shop_admin_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    pools = db.relationship('Pool', backref='shop', lazy='dynamic')
+    def __init__(self, length, width, depth,
+                 material, pool_type, owner, shop_id):
+        self.length = length
+        self.width = width
+        self.depth = depth
+        self.material = material
+        self.pool_type = pool_type
+        self.owner_id = owner
+        self.shop_id = shop_id
 
 
 class Report(db.Model):
-    __tablename__ = 'reports'
+    __tablename__ = 'report'
     id = db.Column(db.Integer(), primary_key=True)
 
     report = db.Column(db.Text())
-    date = db.Column(db.DateTime())
+    date = db.Column(db.String())
 
     pool_id = db.Column(db.Integer, db.ForeignKey('pool.id'))
+
+    def __init__(self, report, date):
+        self.report = report
+        self.date = date
 
 
 class LoginForm(Form):
@@ -122,15 +140,24 @@ class LoginForm(Form):
 
 
 class NewPoolForm(Form):
-    pass
+    length = StringField('Length', validators=[DataRequired()])
+    width = StringField('Width', validators=[DataRequired()])
+    depth = StringField('Depth', validators=[DataRequired()])
+    material = StringField('Pool Material', validators=[DataRequired()])
+    pool_type = StringField('Pool Type', validators=[DataRequired()])
 
 
 class NewPoolShop(Form):
     pass
 
 
-@app.route('/', methods=["GET", "POST"])
+@app.route('/')
 def index():
+    return render_template('index.html')
+
+
+@app.route('/login', methods=["GET", "POST"])
+def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(login_name=form.login_name.data).first()
@@ -140,7 +167,7 @@ def index():
             return redirect(request.args.get('next') or url_for('pools'))
         else:
             flash('Login failed.', 'danger')
-    return render_template('index.html', form=form)
+    return render_template('login.html', form=form)
 
 
 @app.route('/logout')
