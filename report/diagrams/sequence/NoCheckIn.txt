@@ -1,0 +1,22 @@
+@startuml
+hide footbox
+title No Check-In Alarm Sequence Diagram
+
+actor SPACS
+database database
+
+activate SPACS
+
+SPACS --> database: query PTU last checkin < 5 days ago
+
+activate database
+database --> SPACS: list of offending PTU's
+deactivate database
+
+loop Each offending PTU
+    SPACS -> SPACS: Email PoolOwner and PoolShopAdmin
+end
+
+deactivate SPACS
+
+@enduml

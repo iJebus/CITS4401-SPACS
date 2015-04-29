@@ -1,0 +1,44 @@
+@startuml
+hide footbox
+title View Report Sequence Diagram
+
+actor PoolShopAdmin
+actor PoolOwner
+boundary SPACS
+database database
+
+/'
+alt PoolOwner Login
+    PoolOwner -> SPACS: Login
+    activate SPACS
+    activate PoolOwner
+    SPACS -> database: Confirm Login
+    activate database
+    database -> SPACS: Login response
+    deactivate database
+else PoolShopAdmin Login
+    activate PoolShopAdmin
+    PoolShopAdmin -> SPACS: Login
+end
+'/
+
+== Authorisation ==
+activate PoolOwner
+PoolOwner -> SPACS: Authentication Request
+activate SPACS
+
+SPACS -> database: Authentication Request
+activate database
+database --> SPACS: Authentication Response
+deactivate database
+
+alt valid login
+    SPACS --> PoolOwner: Authentication Confirmed
+    |||
+else invalid login
+    SPACS --> PoolOwner: Authentication Denied
+    |||
+end
+
+
+@enduml
