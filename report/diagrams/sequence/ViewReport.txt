@@ -1,10 +1,10 @@
 @startuml
 hide footbox
-title View Report Sequence Diagram
+title Pool Owner view Report Sequence Diagram
 
-actor PoolShopAdmin
 actor PoolOwner
-boundary SPACS
+boundary SPACSLogin
+entity SPACS
 database database
 
 /'
@@ -24,12 +24,12 @@ end
 
 == Authorisation ==
 activate PoolOwner
-PoolOwner -> SPACS: Authentication Request
-activate SPACS
+PoolOwner -> SPACSLogin: Authentication Request
+activate SPACSLogin
 
-SPACS -> database: Authentication Request
+SPACSLogin -> database: Authentication Request
 activate database
-database --> SPACS: Authentication Response
+database --> SPACSLogin: Authentication Response
 deactivate database
 
 alt valid login
