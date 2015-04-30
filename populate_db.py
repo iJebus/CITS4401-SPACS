@@ -14,8 +14,10 @@ shop_admin = PoolShopAdmin('PoolShopAdmin1', 'c', 'Ren Smith',
                            'r.smith@fakemail.com')
 spacs_admin = SPACSAdmin('SPACSAdmin1', 'd', 'Sally Fernando',
                          '3 Ord St, West City', 's.fernando@fakemail.com')
-shop = Shop('2', 'Ren\'s Pool Shack', '2a Floor Rd, San Hilderson',
+shop = Shop('3', 'Ren\'s Pool Shack', '2a Floor Rd, San Hilderson',
             'rens.shack@fakemail.com', '+61 400 555 111')
+shop1 = Shop('3', 'Smithy and Son Pool Supplies', '99 Surf Boulevard, Maxtown',
+             'smith.son@fakemail.com', '+61 400 555 112')
 pool = Pool('6.2', '4.3', '3', 'Cement', 'In-ground', '1', '1')
 pool1 = Pool('3', '2', '1.5', 'Plastic', 'Above-ground', '2', '1')
 
@@ -38,10 +40,12 @@ db.session.add(shop_admin)
 db.session.add(spacs_admin)
 
 db.session.add(shop)
+db.session.add(shop1)
 
 db.session.add(pool)
 db.session.add(pool1)
 
 db.session.add(report)
+db.session.add(report1)
 
 db.session.commit()

@@ -194,6 +194,44 @@ class EditPoolForm(Form):
     submit = SubmitField('Update Pool')
 
 
+class AddShopForm(Form):
+    def validate_username(self, field):
+        if User.query.filter_by(login_name=field.data).first():
+            raise ValidationError('Username already registered.')
+
+    admin_username = StringField(
+        'Shop Admin User name', validators=[DataRequired(), validate_username])
+    admin_password = PasswordField('Shop Admin Password',
+                                   validators=[DataRequired()])
+    admin_name = StringField('Shop Admin Name', validators=[DataRequired()])
+    admin_address = TextAreaField('Shop Admin Address',
+                                  validators=[DataRequired()])
+    admin_email = StringField('Shop Admin Email', validators=[DataRequired(),
+                                                              Email()])
+
+    name = StringField('Shop Name', validators=[DataRequired()])
+    address = StringField('Shop Address', validators=[DataRequired()])
+    email = StringField('Shop Email', validators=[DataRequired(), Email()])
+    phone = StringField('Shop Phone', validators=[DataRequired()])
+    submit = SubmitField('Add Shop')
+
+
+class EditShopForm(Form):
+    name = StringField('Shop Name', validators=[DataRequired()])
+    address = StringField('Shop Address', validators=[DataRequired()])
+    email = StringField('Shop Email', validators=[DataRequired(), Email()])
+    phone = StringField('Shop Phone', validators=[DataRequired()])
+    submit = SubmitField('Update Shop')
+
+
+@app.route('/pools')
+@login_required
+def pools():
+    query = Pool.query.all()
+    owners = PoolOwner.query.all()
+    return render_template('pools.html', query=query, owners=owners)
+
+
 @app.route('/add-pool/', methods=['GET', 'POST'])
 @login_required
 def add_pool():
@@ -232,7 +270,6 @@ def edit_pool(pool_id):
         pool.depth = form.depth.data
         pool.material = form.material.data  # Role.query.get(form.role.data)
         pool.pool_type = form.pool_type.data
-
         db.session.add(pool)
         flash('The pool has been updated.', 'success')
         return redirect(url_for('.pools'))
@@ -253,6 +290,81 @@ def delete_pool(pool_id):
     db.session.delete(pool)
     flash('The pool has been deleted.', 'danger')
     return redirect(url_for('.pools'))
+
+
+@app.route('/shops')
+@login_required
+def shops():
+    if current_user.is_spacs_admin():
+        query = Shop.query.all()
+        owners = User.query.all()
+        return render_template('shops.html', query=query, owners=owners)
+    else:
+        flash('That area is only for SPACS Administrators, sorry.', 'warning')
+        return redirect(url_for('index'))
+
+
+@app.route('/add-shop/', methods=['GET', 'POST'])
+@login_required
+def add_shop():
+    form = AddShopForm()
+    if form.validate_on_submit():
+        owner = PoolOwner(login_name=form.admin_username.data,
+                          password=form.admin_password.data,
+                          address=form.admin_address.data,
+                          name=form.admin_name.data,
+                          email=form.admin_email.data)
+        db.session.add(owner)
+        db.session.commit()
+        owner = User.query.filter_by(
+            login_name=form.admin_username.data).first()
+        shop = Shop(name=form.name.data, address=form.address.data,
+                    email=form.email.data, phone=form.phone.data,
+                    shop_admin=owner.id)
+        db.session.add(shop)
+        db.session.commit()
+        flash('The shop has been added.', 'success')
+        return redirect(url_for('.shops'))
+
+    return render_template('add_shop.html', form=form)
+
+
+@app.route('/edit-shop/<int:shop_id>', methods=['GET', 'POST'])
+@login_required
+def edit_shop(shop_id):
+    shop = Shop.query.get_or_404(shop_id)
+    form = EditShopForm(shop=shop)
+    if form.validate_on_submit():
+        shop.name = form.name.data
+        shop.address = form.address.data
+        shop.email = form.email.data
+        shop.phone = form.email.data
+        db.session.add(shop)
+        flash('The shop has been updated.', 'success')
+        return redirect(url_for('.shops'))
+
+    form.name.data = shop.name
+    form.address.data = shop.address
+    form.email.data = shop.email
+    form.phone.data = shop.phone
+
+    return render_template('edit_shop.html', form=form, shop=shop)
+
+
+@app.route('/delete-shop/<int:shop_id>', methods=['GET', 'POST'])
+@login_required
+def delete_shop(shop_id):
+    shop = Shop.query.get_or_404(shop_id)
+    db.session.delete(shop)
+    flash('The shop has been deleted.', 'danger')
+    return redirect(url_for('.shops'))
+
+
+@app.route('/reports/<int:pool_id>', methods=['GET'])
+@login_required
+def reports(pool_id):
+    data = Report.query.filter_by(pool_id=pool_id).all()
+    return render_template('reports.html', data=data)
 
 
 @app.route('/')
@@ -283,94 +395,6 @@ def logout():
     logout_user()
     flash('You have been logged out.', 'success')
     return redirect(url_for('index'))
-
-
-@app.route('/pools')
-@login_required
-def pools():
-    query = Pool.query.all()
-    owners = PoolOwner.query.all()
-    return render_template('pools.html', query=query, owners=owners)
-
-
-@app.route('/shops')
-@login_required
-def shops():
-    if current_user.is_spacs_admin():
-        query = Shop.query.all()
-        owners = PoolShopAdmin.query.all()
-        return render_template('shops.html', query=query, owners=owners)
-    else:
-        flash('That area is only for SPACS Administrators, sorry.', 'warning')
-        return redirect(url_for('index'))
-
-
-@app.route('/add-shop/', methods=['GET', 'POST'])
-@login_required
-def add_shop():
-    form = AddPoolForm()
-    if form.validate_on_submit():
-        owner = PoolOwner(login_name=form.owner_username.data,
-                          password=form.owner_password.data,
-                          address=form.owner_address.data,
-                          name=form.owner_name.data,
-                          email=form.owner_email.data)
-        db.session.add(owner)
-        db.session.commit()
-        owner = User.query.filter_by(
-            login_name=form.owner_username.data).first()
-        shop = Shop.query.filter_by(shop_admin_id=current_user.id).first()
-        pool = Pool(length=form.length.data, width=form.width.data,
-                    depth=form.depth.data, material=form.material.data,
-                    pool_type=form.pool_type.data, shop_id=shop.id,
-                    owner=owner.id)
-        db.session.add(pool)
-        db.session.commit()
-        flash('The pool has been added.', 'success')
-        return redirect(url_for('.pools'))
-
-    return render_template('add_pool.html', form=form)
-
-
-@app.route('/edit-shop/<int:shop_id>', methods=['GET', 'POST'])
-@login_required
-def edit_shop(shop_id):
-    pool = Pool.query.get_or_404(shop_id)
-    form = EditPoolForm(pool=pool)
-    if form.validate_on_submit():
-        pool.length = form.length.data
-        pool.width = form.width.data
-        pool.depth = form.depth.data
-        pool.material = form.material.data  # Role.query.get(form.role.data)
-        pool.pool_type = form.pool_type.data
-
-        db.session.add(pool)
-        flash('The pool has been updated.', 'success')
-        return redirect(url_for('.pools'))
-
-    form.length.data = pool.length
-    form.width.data = pool.width
-    form.depth.data = pool.depth
-    form.material.data = pool.material
-    form.pool_type.data = pool.pool_type
-
-    return render_template('edit_pool.html', form=form, pool=pool)
-
-
-@app.route('/delete-shop/<int:shop_id>', methods=['GET', 'POST'])
-@login_required
-def delete_shop(shop_id):
-    pool = Pool.query.get_or_404(shop_id)
-    db.session.delete(pool)
-    flash('The pool has been deleted.', 'danger')
-    return redirect(url_for('.pools'))
-
-
-@app.route('/reports/<int:pool_id>', methods=['GET'])
-@login_required
-def reports(pool_id):
-    data = Report.query.filter_by(pool_id=pool_id).all()
-    return render_template('reports.html', data=data)
 
 
 @app.route('/contact')
