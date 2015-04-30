@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}SPACS Pools{% endblock %}
+
+{% block content %}
+{{ super() }}
+<div class="container">
+    <h1>Pools</h1>
+    <h4>Pools currently associated with your Pool Shop.</h4>
+    <a href="{{ url_for('.add_pool') }}">
+        <button type="button" class="btn btn-primary">Add Pool</button>
+    </a>
+
+    {% for pool in query %}
+    <hr/>
+    <table class="table table-bordered">
+        <tr>
+            <th>Pool ID</th>
+            <th>Pool Owner</th>
+            <th>Address</th>
+            <th>Email</th>
+        </tr>
+        {% for owner in owners %}
+        {% if pool.owner_id == owner.id %}
+        <tr>
+            <td>{{ pool.id }}</td>
+            <td>{{ owner.name }}</td>
+            <td>{{ owner.address }}</td>
+            <td>{{ owner.email }}</td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+    </table>
+    <table class="table table-bordered">
+        <tr>
+            <th>Length</th>
+            <th>Width</th>
+            <th>Depth</th>
+            <th>Material</th>
+            <th>Type</th>
+        </tr>
+        <tr>
+            <td>{{ pool.length }}</td>
+            <td>{{ pool.width }}</td>
+            <td>{{ pool.depth }}</td>
+            <td>{{ pool.material }}</td>
+            <td>{{ pool.pool_type }}</td>
+        </tr>
+    </table>
+    <div class="row">
+        <div class="col-md-3 col-md-offset-3">
+            <a href="{{ url_for('.edit_pool', pool_id=pool.id) }}">
+                <button type="button" class="btn btn-warning">Edit Pool
+                </button>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('.delete_pool', pool_id=pool.id) }}">
+                <button type="button" class="btn btn-danger">Delete Pool
+                </button>
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <em>No pools registered with shop.</em>
+    {% endfor %}
+
+</div>
+
+{% endblock %}

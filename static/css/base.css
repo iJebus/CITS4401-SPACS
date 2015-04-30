@@ -1,8 +1,13 @@
 body {
   padding-top: 50px;
   text-align: center;
+    padding-bottom: 50px;
 }
 
 .alert {
     margin: 20px;
+}
+
+.table {
+    margin-top: 20px;
 }

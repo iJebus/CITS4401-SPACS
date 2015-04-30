@@ -4,21 +4,31 @@ from application import db, PoolOwner, PoolShopAdmin, \
 
 db.create_all()
 
-owner = PoolOwner('PoolOwner1', 'a')
-shop_admin = PoolShopAdmin('PoolShopAdmin1', 'a')
-spacs_admin = SPACSAdmin('SPACSAdmin1', 'a')
+owner = PoolOwner('PoolOwner1', 'a', 'Steve McQueen',
+                  '73 Evergreen Terrace, Springfield',
+                  's.mcqueen@fakemail.com')
+owner1 = PoolOwner('PoolOwner2', 'b', 'Joe Bloggs',
+                   '52 Sunset Drive, Springfield', 'j.bloggs@fakemail.com')
+shop_admin = PoolShopAdmin('PoolShopAdmin1', 'c', 'Ren Smith',
+                           '44 Hobb Cover, Springfield',
+                           'r.smith@fakemail.com')
+spacs_admin = SPACSAdmin('SPACSAdmin1', 'd', 'Sally Fernando',
+                         '3 Ord St, West City', 's.fernando@fakemail.com')
 shop = Shop('2')
-pool = Pool('6.2', '4.3', '3', 'Cement', 'In-ground', '1', '2')
+pool = Pool('6.2', '4.3', '3', 'Cement', 'In-ground', '1', '1')
+pool1 = Pool('3', '2', '1.5', 'Plastic', 'Above-ground', '2', '1')
 report = Report('This is an example report. Latest measurements are x,y,z. '
                 'Acid has been rising over the past month. Chlorine has been'
                 'dropping. Measurements are all still within nominal levels.'
                 'No recommendations available.', '2015-4-29')
 
 db.session.add(owner)
+db.session.add(owner1)
 db.session.add(shop_admin)
 db.session.add(spacs_admin)
 db.session.add(shop)
 db.session.add(pool)
+db.session.add(pool1)
 db.session.add(report)
 
 db.session.commit()
