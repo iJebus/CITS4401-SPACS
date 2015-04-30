@@ -6,10 +6,13 @@
 {{ super() }}
 <div class="container">
     <h1>Pools</h1>
-    <h4>Pools currently associated with your Pool Shop.</h4>
-    <a href="{{ url_for('.add_pool') }}">
-        <button type="button" class="btn btn-primary">Add Pool</button>
-    </a>
+    <h4>Pools currently registered.</h4>
+
+    {% if current_user.role == 'PoolShopAdmin' %}
+        <a href="{{ url_for('.add_pool') }}">
+            <button type="button" class="btn btn-primary">Add Pool</button>
+        </a>
+    {% endif %}
 
     {% for pool in query %}
     <hr/>
@@ -48,21 +51,29 @@
         </tr>
     </table>
     <div class="row">
-        <div class="col-md-3 col-md-offset-3">
-            <a href="{{ url_for('.edit_pool', pool_id=pool.id) }}">
-                <button type="button" class="btn btn-warning">Edit Pool
+        <div class="col-md-4 {% if current_user.role == 'SPACSAdmin' %}col-md-offset-4{% endif %}">
+            <a href="{{ url_for('.reports', pool_id=pool.id) }}">
+                <button type="button" class="btn btn-success">View Reports
                 </button>
             </a>
         </div>
-        <div class="col-md-3">
-            <a href="{{ url_for('.delete_pool', pool_id=pool.id) }}">
-                <button type="button" class="btn btn-danger">Delete Pool
-                </button>
-            </a>
-        </div>
+        {% if current_user.role == 'PoolShopAdmin' %}
+            <div class="col-md-4">
+                <a href="{{ url_for('.edit_pool', pool_id=pool.id) }}">
+                    <button type="button" class="btn btn-warning">Edit Pool
+                    </button>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="{{ url_for('.delete_pool', pool_id=pool.id) }}">
+                    <button type="button" class="btn btn-danger">Delete Pool
+                    </button>
+                </a>
+            </div>
+        {% endif %}
     </div>
     {% else %}
-    <em>No pools registered with shop.</em>
+        <em>No pools registered.</em>
     {% endfor %}
 
 </div>

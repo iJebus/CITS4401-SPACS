@@ -52,7 +52,7 @@ class User(db.Model, UserMixin, AnonymousUserMixin):
         self.email = email
 
     def __repr__(self):
-        return "<{}, {}>".format(self.login_name, self.role)
+        return "<{}>".format(self.login_name)
 
     def is_spacs_admin(self):
         return self.role == 'SPACSAdmin'
@@ -95,11 +95,23 @@ class Shop(db.Model):
     __tablename__ = 'shop'
     id = db.Column(db.Integer(), primary_key=True)
 
+    name = db.Column(db.String())
+    address = db.Column(db.Text())
+    email = db.Column(db.String())
+    phone = db.Column(db.String())
+
     shop_admin_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     pools = db.relationship('Pool', backref='shop', lazy='dynamic')
 
-    def __init__(self, shop_admin):
+    def __init__(self, shop_admin, name, address, email, phone):
         self.shop_admin_id = shop_admin
+        self.name = name
+        self.address = address
+        self.email = email
+        self.phone = phone
+
+    def __repr__(self):
+        return '<Shop {}>'.format(self.name)
 
 
 class Pool(db.Model):
@@ -126,6 +138,9 @@ class Pool(db.Model):
         self.owner_id = owner
         self.shop_id = shop_id
 
+    def __repr__(self):
+        return '<Pool {}>'.format(self.id)
+
 
 class Report(db.Model):
     __tablename__ = 'report'
@@ -140,15 +155,14 @@ class Report(db.Model):
         self.report = report
         self.date = date
 
+    def __repr__(self):
+        return '<Report {}>'.format(self.id)
+
 
 class LoginForm(Form):
     login_name = StringField('Login name', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Log In')
-
-
-class NewPoolShop(Form):
-    pass
 
 
 class AddPoolForm(Form):
@@ -178,21 +192,6 @@ class EditPoolForm(Form):
     material = StringField('Pool Material', validators=[DataRequired()])
     pool_type = StringField('Pool Type', validators=[DataRequired()])
     submit = SubmitField('Update Pool')
-
-
-"""
-        self.role.choices = [(role.id, role.name)
-                             for role in Role.query.order_by(Role.name).all()]
-
-if current_user.can(Permission.WRITE_ARTICLES) and \
-            form.validate_on_submit():
-        post = Post(body=form.body.data,
-                    author=current_user._get_current_object())
-        db.session.add(post)
-        return redirect(url_for('.index'))
-
-        # Role.query.get(form.role.data)
-"""
 
 
 @app.route('/add-pool/', methods=['GET', 'POST'])
@@ -289,13 +288,89 @@ def logout():
 @app.route('/pools')
 @login_required
 def pools():
-    if current_user.is_shop_admin():
-        query = Pool.query.all()
-        owners = PoolOwner.query.all()
-        return render_template('pools.html', query=query, owners=owners)
+    query = Pool.query.all()
+    owners = PoolOwner.query.all()
+    return render_template('pools.html', query=query, owners=owners)
+
+
+@app.route('/shops')
+@login_required
+def shops():
+    if current_user.is_spacs_admin():
+        query = Shop.query.all()
+        owners = PoolShopAdmin.query.all()
+        return render_template('shops.html', query=query, owners=owners)
     else:
-        flash('This area is only for Pool Shop Administrators', 'warning')
+        flash('That area is only for SPACS Administrators, sorry.', 'warning')
         return redirect(url_for('index'))
+
+
+@app.route('/add-shop/', methods=['GET', 'POST'])
+@login_required
+def add_shop():
+    form = AddPoolForm()
+    if form.validate_on_submit():
+        owner = PoolOwner(login_name=form.owner_username.data,
+                          password=form.owner_password.data,
+                          address=form.owner_address.data,
+                          name=form.owner_name.data,
+                          email=form.owner_email.data)
+        db.session.add(owner)
+        db.session.commit()
+        owner = User.query.filter_by(
+            login_name=form.owner_username.data).first()
+        shop = Shop.query.filter_by(shop_admin_id=current_user.id).first()
+        pool = Pool(length=form.length.data, width=form.width.data,
+                    depth=form.depth.data, material=form.material.data,
+                    pool_type=form.pool_type.data, shop_id=shop.id,
+                    owner=owner.id)
+        db.session.add(pool)
+        db.session.commit()
+        flash('The pool has been added.', 'success')
+        return redirect(url_for('.pools'))
+
+    return render_template('add_pool.html', form=form)
+
+
+@app.route('/edit-shop/<int:shop_id>', methods=['GET', 'POST'])
+@login_required
+def edit_shop(shop_id):
+    pool = Pool.query.get_or_404(shop_id)
+    form = EditPoolForm(pool=pool)
+    if form.validate_on_submit():
+        pool.length = form.length.data
+        pool.width = form.width.data
+        pool.depth = form.depth.data
+        pool.material = form.material.data  # Role.query.get(form.role.data)
+        pool.pool_type = form.pool_type.data
+
+        db.session.add(pool)
+        flash('The pool has been updated.', 'success')
+        return redirect(url_for('.pools'))
+
+    form.length.data = pool.length
+    form.width.data = pool.width
+    form.depth.data = pool.depth
+    form.material.data = pool.material
+    form.pool_type.data = pool.pool_type
+
+    return render_template('edit_pool.html', form=form, pool=pool)
+
+
+@app.route('/delete-shop/<int:shop_id>', methods=['GET', 'POST'])
+@login_required
+def delete_shop(shop_id):
+    pool = Pool.query.get_or_404(shop_id)
+    db.session.delete(pool)
+    flash('The pool has been deleted.', 'danger')
+    return redirect(url_for('.pools'))
+
+
+@app.route('/reports/<int:pool_id>', methods=['GET'])
+@login_required
+def reports(pool_id):
+    data = Report.query.filter_by(pool_id=pool_id).all()
+    return render_template('reports.html', data=data)
 
 
 @app.route('/contact')

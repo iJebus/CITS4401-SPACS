@@ -1,10 +1,20 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
+{% extends "base.html" %}
 
-</body>
-</html>
+{% block title %}SPACS Reports{% endblock %}
+
+{% block content %}
+    {{ super() }}
+    <div class="container">
+        <h1>Reports</h1>
+        <h4>Reports on Pools.</h4>
+        {% for report in data %}
+            <hr/>
+            <h4>{{ report.date }}</h4>
+            <p>{{ report.report }}</p>
+        {% else %}
+            <hr/>
+            <em>No reports registered with SPACS for this pool.</em>
+        {% endfor %}
+    </div>
+
+{% endblock %}

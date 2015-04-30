@@ -19,18 +19,17 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">SPACS</a>
+            <a class="navbar-brand" href="{{ url_for('index') }}">SPACS</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
-                <li><a href="/">Home</a></li>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
                 {% if current_user.is_authenticated() %}
-                {% if current_user.is_shop_admin() %}
-                <li><a href="/pools">Pools</a></li>
-                {% elif current_user.is_spacs_admin() %}
-                <li><a href="#">Pool Shops</a></li>
-                {% endif %}
-                <li><a href="#">Reports</a></li>
+                    <li><a href="{{ url_for('pools') }}">Pools</a></li>
+                    {% if current_user.is_spacs_admin() %}
+                        <li><a href="{{ url_for('shops') }}">Pool Shops</a>
+                        </li>
+                    {% endif %}
                 {% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
@@ -39,7 +38,8 @@
                 {% else %}
                 <li><a href="{{ url_for('index') }}">Sign In</a></li>
                 {% endif %}
-                <li class="pull-right"><a href="/contact">Contact</a></li>
+                <li class="pull-right"><a href="{{ url_for('contact') }}">Contact</a>
+                </li>
             </ul>
         </div>
     </div>
