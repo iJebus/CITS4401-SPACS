@@ -1,3 +1,6 @@
+' python -m plantuml report/diagrams/sequence/RegularCheckIn.txt
+
+
 @startuml
 hide footbox
 title RegularCheckIn Sequence Diagram
@@ -5,13 +8,14 @@ title RegularCheckIn Sequence Diagram
 actor PoolOwner
 actor PoolShopAdministrator
 actor PTU
-boundary SPACS
-database database
+boundary API
+control SPACS
+entity records
 
 /' boundary Foo2
 control Foo3
 entity Foo4
-database database
+database records
 
  1st column: Should correspond to the actor who
 initiated the use case
@@ -23,40 +27,49 @@ manages the rest of the use case
 
 == Authorisation ==
 activate PTU
-PTU -> SPACS: Authentication Request (ptu_login()?)
-activate SPACS
+PTU -> API: Authentication Request
+activate API
 
-SPACS -> database: Authentication Request
-activate database
-database --> SPACS: Authentication Response
-deactivate database
+API -> SPACS: Authentication Request
+activate SPACS
+SPACS -> records: Check Authentication
+activate records
+records --> SPACS: Authentication Response
+deactivate records
+SPACS --> API: Authentication Response
+deactivate SPACS
 
 alt valid login
-    SPACS --> PTU: Authentication Response(login_confirmed?)
+    API --> PTU: Authentication Response(Success)
     |||
 else invalid login
-    SPACS --> PTU: Authentication Response(login_failed?)
+    API --> PTU: Authentication Response(Fail)
     |||
 end
-
+deactivate API
 
 == Data Submission ==
-PTU -> SPACS: receive_data()
-SPACS --> PTU: acknowledge_receipt()
+PTU -> API: Send measurements
+activate API
+API -> SPACS: Send measurements
+activate SPACS
+SPACS -> records: Store measurements
+activate records
+records --> SPACS: Confirm stored
+deactivate records
+SPACS --> API: Acknowledge receipt
+API --> PTU: Acknowledge receipt
+deactivate API
 deactivate PTU
 
-SPACS -> SPACS: process_data()
-activate SPACS
-alt data inside safe ranges
-    SPACS -> database: store_data()
+SPACS -> SPACS: Process submitted data
+alt measurements inside safe ranges
     |||
 else data outside safe ranges
-    SPACS -> database: store_data()
-    SPACS --> PoolOwner: Warning(send_mail())
-    SPACS --> PoolShopAdministrator: Warning(send_email())
+    SPACS --> PoolOwner: Send Alert
+    SPACS --> PoolShopAdministrator: Send Alert
     |||
 end
-deactivate SPACS
 
 deactivate SPACS
 

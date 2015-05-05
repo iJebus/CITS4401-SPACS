@@ -10,4 +10,3 @@ SQLAlchemy==1.0.0
 WTForms==2.0.2
 Werkzeug==0.10.4
 itsdangerous==0.24
-plantuml

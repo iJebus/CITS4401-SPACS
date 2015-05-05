@@ -35,7 +35,7 @@ class User(db.Model, UserMixin, AnonymousUserMixin):
     id = db.Column(db.Integer(), primary_key=True)
 
     login_name = db.Column(db.String(), unique=True, index=True)
-    password = db.Column(db.String(128))
+    password = db.Column(db.String())
     name = db.Column(db.String())
     address = db.Column(db.Text())
     email = db.Column(db.String())
@@ -118,6 +118,9 @@ class Pool(db.Model):
     __tablename__ = 'pool'
     id = db.Column(db.Integer(), primary_key=True)
 
+    ptu_username = db.Column(db.String())
+    ptu_password = db.Column(db.String())
+
     length = db.Column(db.Float())
     width = db.Column(db.Float())
     depth = db.Column(db.Float())
@@ -166,17 +169,24 @@ class LoginForm(Form):
 
 
 class AddPoolForm(Form):
-    def validate_username(self, field):
+    def validate_user(self, field):
         if User.query.filter_by(login_name=field.data).first():
-            raise ValidationError('Username already registered.')
+            raise ValidationError('Login name already registered.')
 
-    owner_username = StringField('User name', validators=[DataRequired(),
-                                                          validate_username])
+    def validate_ptu(self, field):
+        if Pool.query.filter_by(ptu_username=field.data).first():
+            raise ValidationError('PTU login name already registered.')
+
+    owner_username = StringField('Login Name', validators=[DataRequired(),
+                                                           validate_user])
     owner_password = PasswordField('Password', validators=[DataRequired()])
     owner_name = StringField('Name', validators=[DataRequired()])
     owner_address = TextAreaField('Address', validators=[DataRequired()])
     owner_email = StringField('Email', validators=[DataRequired(), Email()])
 
+    ptu_username = StringField('PTU Login Code', validators=[
+        DataRequired(), validate_ptu])
+    ptu_password = PasswordField('PTU Password', validators=[DataRequired()])
     length = StringField('Length', validators=[DataRequired()])
     width = StringField('Width', validators=[DataRequired()])
     depth = StringField('Depth', validators=[DataRequired()])
@@ -186,6 +196,13 @@ class AddPoolForm(Form):
 
 
 class EditPoolForm(Form):
+    def validate_ptu(self, field):
+        if Pool.query.filter_by(ptu_username=field.data).first():
+            raise ValidationError('PTU login name already registered.')
+
+    ptu_username = StringField('PTU Login Code', validators=[
+        DataRequired(), validate_ptu])
+    ptu_password = PasswordField('PTU Password', validators=[DataRequired()])
     length = StringField('Length', validators=[DataRequired()])
     width = StringField('Width', validators=[DataRequired()])
     depth = StringField('Depth', validators=[DataRequired()])

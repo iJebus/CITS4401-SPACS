@@ -1,4 +1,4 @@
-' python -m plantuml diagrams/usecases.txt
+' python -m plantuml report/diagrams/usecases.txt
 
 
 left to right direction
@@ -9,24 +9,28 @@ actor PTU
 actor PoolOwner
 actor PoolShopAdmin
 actor SPACSAdmin
+actor Time
 
 rectangle SPACS {
 
     (RegularCheckIn) <. (Alert) : <<extend>>
     (UrgentCheckIn) <. (Alert) : <<extend>>
-    (NoCheckInAlarm) <. (Alert) : <<extend>>
-    (Alert) -> PoolOwner
-    (Alert) -> PoolShopAdmin
-    (Alert) -> SPACSAdmin
+    (NoCheckInAlarm) <. (Alert) : <<include>>
+    Time -> (NoCheckInAlarm)
+'    (Alert) -> PoolOwner
+'    (Alert) -> PoolShopAdmin
+'    (Alert) -> SPACSAdmin
     PoolOwner --> (ViewReport)
-    PoolShopAdmin -> (ViewReport)
+    PTU -> (RegularCheckIn)
+    PTU -> (UrgentCheckIn)
     PoolShopAdmin -> (AddPool)
     PoolShopAdmin -> (EditPool)
     PoolShopAdmin -> (RemovePool)
-    PTU --> (RegularCheckIn)
-    PTU --> (UrgentCheckIn)
+    PoolShopAdmin -> (ViewReport)
     SPACSAdmin -> (AddPoolShop)
     SPACSAdmin -> (EditPoolShop)
     SPACSAdmin -> (RemovePoolShop)
+    SPACSAdmin -> (ViewReport)
+    SPACSAdmin -> (TransferPool)
 }
 

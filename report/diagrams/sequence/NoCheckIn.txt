@@ -1,20 +1,25 @@
+' python -m plantuml report/diagrams/sequence/NoCheckIn.txt
+
 @startuml
 hide footbox
 title No Check-In Alarm Sequence Diagram
 
-actor SPACS
-database database
+actor PoolOwner
+actor PoolShopAdmin
+control SPACS
+entity records
 
 activate SPACS
 
-SPACS --> database: query PTU last checkin < 5 days ago
+SPACS -> records: Query for PTU where last check-in < 5 days ago
 
-activate database
-database --> SPACS: list of offending PTU's
-deactivate database
+activate records
+records --> SPACS: List of offending PTU's
+deactivate records
 
 loop Each offending PTU
-    SPACS -> SPACS: Email PoolOwner and PoolShopAdmin
+    SPACS --> PoolOwner: Email Alert
+    SPACS --> PoolShopAdmin: Email Alert
 end
 
 deactivate SPACS

@@ -1,21 +1,23 @@
+' python -m plantuml report/diagrams/sequence/ViewReport.txt
+
 @startuml
 hide footbox
-title Pool Owner view Report Sequence Diagram
+title Pool Owner View Report Sequence Diagram
 
 actor PoolOwner
-boundary SPACSLogin
-entity SPACS
-database database
+boundary Browser
+control SPACS
+entity records
 
 /'
 alt PoolOwner Login
     PoolOwner -> SPACS: Login
     activate SPACS
     activate PoolOwner
-    SPACS -> database: Confirm Login
-    activate database
-    database -> SPACS: Login response
-    deactivate database
+    SPACS -> records: Confirm Login
+    activate records
+    records -> SPACS: Login response
+    deactivate records
 else PoolShopAdmin Login
     activate PoolShopAdmin
     PoolShopAdmin -> SPACS: Login
@@ -24,21 +26,41 @@ end
 
 == Authorisation ==
 activate PoolOwner
-PoolOwner -> SPACSLogin: Authentication Request
-activate SPACSLogin
+PoolOwner -> Browser: Authentication Request
+activate Browser
 
-SPACSLogin -> database: Authentication Request
-activate database
-database --> SPACSLogin: Authentication Response
-deactivate database
+Browser -> SPACS: Authentication Request
+activate SPACS
+SPACS -> records: Check Authentication
+activate records
+records --> SPACS: Authentication Response
+deactivate records
+SPACS --> Browser: Authentication Response
+deactivate SPACS
 
 alt valid login
-    SPACS --> PoolOwner: Authentication Confirmed
+    Browser --> PoolOwner: Authentication Response(Success)
     |||
 else invalid login
-    SPACS --> PoolOwner: Authentication Denied
+    Browser --> PoolOwner: Authentication Response(Fail)
     |||
 end
+deactivate Browser
 
+== View Report ==
+
+PoolOwner -> Browser: Request Report to view
+activate Browser
+Browser -> SPACS: Get Report
+activate SPACS
+SPACS -> records: Get Report
+activate records
+records --> SPACS: Report content
+deactivate records
+SPACS --> Browser: Report content
+deactivate SPACS
+Browser --> PoolOwner: Rendered report
+deactivate Browser
+deactivate PoolOwner
 
 @enduml

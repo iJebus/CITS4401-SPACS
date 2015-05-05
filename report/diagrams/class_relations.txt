@@ -1,18 +1,30 @@
-' DO NOT DO A PTU CLASS AS IT'S EXTERNAL BLACK BOX SYSTEM!
-' python -m plantuml diagrams/classes.txt
+' python -m plantuml report/diagrams/class_relations.txt
 
 skinparam classAttributeIconSize 0
 skinparam nodesep 75
 title SPACS System Class Relationships Diagram
 
-PTU "0..*" -* "1" SPACS
+/' PTU "0..*" -* "1" SPACS
 Pool "1" -* "1" PTU
 User "2" --o "1..*" Pool
 User "1" --o "1..*" PTU
 User "1..*" --* "1" SPACS
 PoolOwner --|> User
 PoolShopAdmin --|> User
-SPACSAdmin --|> User
+SPACSAdmin --|> User '/
+
+User <|-- PoolOwner
+User <|-- PoolShopAdmin
+User <|-- SPACSAdmin
+SPACSAdmin "1" --* "1" SPACS
+' PoolShopAdmin "0..*" --* "1" SPACS
+' PoolShopAdmin "1" *-- "0..*" Pool
+PoolShopAdmin "1" --* "1" PoolShop
+' PoolOwner "0..*" --* "1" SPACS
+PoolOwner "1" --* "1" Pool
+PTU "1" -* "1" Pool
+Pool "0..*" -* "1" PoolShop
+PoolShop "0..*" -* "1" SPACS
 
 Class Pool {
 }

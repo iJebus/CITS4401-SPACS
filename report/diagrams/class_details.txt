@@ -1,25 +1,13 @@
-' DO NOT DO A PTU CLASS AS IT'S EXTERNAL BLACK BOX SYSTEM!
-' python -m plantuml diagrams/classes.txt
+' python -m plantuml report/diagrams/class_details.txt
 
 skinparam classAttributeIconSize 0
 skinparam nodesep 75
 title SPACS System Class Details Diagram
 
 Class Pool {
-    pool_owner: User
+    id: Integer
+    pool_owner_id: Integer
 
-    ' Pool Measurement Values
-    ph: Float
-    ORP: Float
-    TA: Float
-    temp: Float
-    water_hardness: Float
-    last_filter_operation: datetime
-    water_flow_rate: Float
-    chlorinator_status: String
-    water_level_status: String
-
-    ' Pool ID Values
     pool_type: String
     filter_type: String
     pump_type: String
@@ -27,21 +15,46 @@ Class Pool {
     pool_capacity: Float
 }
 
-class PTU {
-    pool_shop_admin: User
+Class PoolShop {
+    id: Integer
+    shop_admin_id: Integer
 
-    login_id: Integer
+    name: String
+    address: Text
+    email: String
+}
+
+Class PoolMeasurement {
+    id: Integer
+    pool_id: Integer
+
+    date: Datetime
+    ph: Float
+    orp: Float
+    ta: Float
+    temp: Float
+    water_hardness: Float
+    last_filter_operation: Datetime
+    water_flow_rate: Float
+    chlorinator_status: String
+    water_level_status: String
+}
+
+class PTU {
+    id: Integer
+    pool_id: Integer
+
+    login_id_code: String
     password: String
     need_reset: Boolean
 
-    gather_pool_measurements()
+    gather_measurements()
     regular_check_in()
     urgent_check_in()
-    send_email()
 }
 
 class SPACS {
-    SPACSAdmin: User
+    spacs_admin_id: Integer
 
     acknowledge_receipt()
     ' authentication()
@@ -51,39 +64,40 @@ class SPACS {
     overdue_update()
     send_email()
     status_report()
-    view_report()
-
-    ' Pool Controls
-    add_pool()
-    edit_pool()
-    delete_pool()
-    transfer_pools()
-
-    ' Shop Controls
-    add_shop()
-    edit_shop()
-    delete_shop()
 }
 
 class User {
-    login_name : String
-    password : String
-    role : String
+    id: Integer
+    login_name: String
+    password: String
+    role: String
 
     name: String
     address: Text
     email: String
+
+    view_report()
+    ' check_password()
 }
 
 
 class PoolOwner {
-    role : 'PoolOwner'
+    role: 'PoolOwner'
 }
 
 class PoolShopAdmin {
     role: 'PoolShopAdmin'
+    is_shop_admin()
+    add_pool()
+    edit_pool()
+    delete_pool()
 }
 
 class SPACSAdmin{
     role: 'SPACSAdmin'
+    is_spacs_admin()
+    transfer_pool()
+    add_shop()
+    edit_shop()
+    delete_shop()
 }

@@ -1,0 +1,17 @@
+' python -m plantuml report/diagrams/usecase_no_checkin.txt
+
+left to right direction
+skinparam packageStyle rect
+title SPACS System Usecase Diagram
+
+actor PoolOwner
+actor PoolShopAdmin
+actor Time
+
+rectangle SPACS {
+    (NoCheckInAlarm) <. (Alert) : <<include>>
+    Time -> (NoCheckInAlarm)
+    (Alert) -> PoolOwner
+    (Alert) -> PoolShopAdmin
+}
+

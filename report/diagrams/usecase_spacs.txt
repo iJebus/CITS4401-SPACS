@@ -1,0 +1,21 @@
+' python -m plantuml report/diagrams/usecase_spacs.txt
+
+
+left to right direction
+skinparam packageStyle rect
+title SPACS System Usecase Diagram
+
+actor PoolOwner
+actor PoolShopAdmin
+actor SPACSAdmin
+
+rectangle SPACS {
+    SPACSAdmin -> (AddPoolShop)
+    (AddPoolShop) -> PoolShopAdmin
+    SPACSAdmin -> (EditPoolShop)
+    SPACSAdmin -> (RemovePoolShop)
+    (RemovePoolShop) -> PoolShopAdmin
+    SPACSAdmin -> (TransferPool)
+    (TransferPool) -> PoolShopAdmin
+    (TransferPool) -> PoolOwner
+}
